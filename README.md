@@ -28,3 +28,5 @@ Laberinto y Departamentos Norte ahora incluyen resumen, fotografía y enlaces a 
 
 Pendiente de confirmar: distribución de las dos plazas restantes hasta completar seis personas; WhatsApp de La casita y de Manto. No se reutilizan los teléfonos de los otros alojamientos como contacto de Manto.
 # manto
+# manto
+# manto
