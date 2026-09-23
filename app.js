@@ -1,2 +1,56 @@
 const toggle = document.querySelector('.menu'); const nav = document.querySelector('#nav'); if (toggle && nav) { toggle.addEventListener('click', () => { const open = toggle.getAttribute('aria-expanded') !== 'true'; toggle.setAttribute('aria-expanded', String(open)); toggle.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú'); nav.classList.toggle('open', open) }); nav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => { nav.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); toggle.setAttribute('aria-label', 'Abrir menú') })); document.addEventListener('keydown', e => { if (e.key === 'Escape' && nav.classList.contains('open')) { nav.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); toggle.setAttribute('aria-label', 'Abrir menú'); toggle.focus() } }) } document.querySelectorAll('[data-contact]').forEach(b => b.addEventListener('click', () => { const note = b.parentElement.querySelector('.contact-note'); if (note) { note.hidden = false; note.scrollIntoView({ block: 'nearest', behavior: 'smooth' }) } }));
-const allPhotos = [{ src: 'assets/la-casita/1.webp', alt: 'Comedor' }, { src: 'assets/la-casita/2.webp', alt: 'Dormitorio Matrimonial' }, { src: 'assets/la-casita/3.webp', alt: 'Parque privado' }, { src: 'assets/la-casita/4.webp', alt: 'Baño completo' }, { src: 'assets/la-casita/5.webp', alt: 'Living con 2 sillones cama' }, { src: 'assets/la-casita/6.webp', alt: 'Vista del living al comedor' }, { src: 'assets/la-casita/7.webp', alt: 'Comedor y living' }, { src: 'assets/la-casita/8.webp', alt: 'Frente de la casa y pergola para auto' }, { src: 'assets/la-casita/9.webp', alt: 'Parrilla y espacio exterior' }, { src: 'assets/la-casita/4N7A5239.webp', alt: '' }, { src: 'assets/la-casita/4N7A5242.webp', alt: '' }, { src: 'assets/la-casita/4N7A5247.webp', alt: '' }, { src: 'assets/la-casita/4N7A5248.webp', alt: '' }, { src: 'assets/la-casita/4N7A5260.webp', alt: '' }, { src: 'assets/la-casita/4N7A5262.webp', alt: '' }, { src: 'assets/la-casita/4N7A5273.webp', alt: '' }, { src: 'assets/la-casita/4N7A5278.webp', alt: '' }, { src: 'assets/la-casita/4N7A5291.webp', alt: '' }, { src: 'assets/la-casita/4N7A5299.webp', alt: '' }, { src: 'assets/la-casita/4N7A5302.webp', alt: '' }, { src: 'assets/la-casita/4N7A5303.webp', alt: '' }, { src: 'assets/la-casita/4N7A5306.webp', alt: '' }, { src: 'assets/la-casita/4N7A5308.webp', alt: '' }, { src: 'assets/la-casita/4N7A5310.webp', alt: '' }, { src: 'assets/la-casita/4N7A5313.webp', alt: '' }]; const galleryLinks = [...document.querySelectorAll('[data-gallery]')]; const photoDialog = document.querySelector('#photo-dialog'); if (photoDialog) { let photoIndex = 0; let origin = null; const large = document.querySelector('#photo-large'); const count = document.querySelector('#photo-count'); const caption = document.querySelector('#photo-caption'); function showPhoto(i) { photoIndex = (i + allPhotos.length) % allPhotos.length; const p = allPhotos[photoIndex]; large.src = p.src; large.alt = p.alt; caption.textContent = p.alt; count.textContent = `${photoIndex + 1} / ${allPhotos.length}`; } function openDialog(startIndex, triggerEl) { if (typeof photoDialog.showModal !== 'function') return; origin = triggerEl || null; showPhoto(startIndex); photoDialog.showModal(); document.body.classList.add('gallery-open'); } galleryLinks.forEach((link, i) => link.addEventListener('click', e => { e.preventDefault(); openDialog(i, link); })); document.querySelectorAll('#ver-todas-btn,#ver-todas-btn-bottom').forEach(btn => { if (btn) btn.addEventListener('click', () => openDialog(0, btn)); }); photoDialog.querySelector('[data-close]').addEventListener('click', () => photoDialog.close()); photoDialog.querySelector('[data-prev]').addEventListener('click', () => showPhoto(photoIndex - 1)); photoDialog.querySelector('[data-next]').addEventListener('click', () => showPhoto(photoIndex + 1)); photoDialog.addEventListener('keydown', e => { if (e.key === 'ArrowLeft') { e.preventDefault(); showPhoto(photoIndex - 1) } if (e.key === 'ArrowRight') { e.preventDefault(); showPhoto(photoIndex + 1) } }); photoDialog.addEventListener('click', e => { if (e.target === photoDialog) { const r = photoDialog.getBoundingClientRect(); if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) photoDialog.close() } }); photoDialog.addEventListener('close', () => { document.body.classList.remove('gallery-open'); if (origin) origin.focus() }); }
+const galleryLinks = [...document.querySelectorAll('[data-gallery]')];
+const photoDialog = document.querySelector('#photo-dialog');
+if (photoDialog && galleryLinks.length) {
+  const galleryData = document.querySelector('#gallery-data');
+  let allPhotos = galleryLinks.map(link => ({
+    src: link.getAttribute('href'),
+    alt: link.querySelector('img')?.alt || 'Foto de la propiedad'
+  }));
+  if (galleryData) {
+    try { allPhotos = JSON.parse(galleryData.textContent); } catch (_) {}
+  }
+  let photoIndex = 0;
+  let origin = null;
+  const large = document.querySelector('#photo-large');
+  const count = document.querySelector('#photo-count');
+  const caption = document.querySelector('#photo-caption');
+  function showPhoto(i) {
+    photoIndex = (i + allPhotos.length) % allPhotos.length;
+    const photo = allPhotos[photoIndex];
+    large.src = photo.src;
+    large.alt = photo.alt;
+    caption.textContent = photo.alt;
+    count.textContent = `${photoIndex + 1} / ${allPhotos.length}`;
+  }
+  function openDialog(startIndex, triggerEl) {
+    if (typeof photoDialog.showModal !== 'function') return;
+    origin = triggerEl || null;
+    showPhoto(startIndex);
+    photoDialog.showModal();
+    document.body.classList.add('gallery-open');
+  }
+  galleryLinks.forEach((link, i) => link.addEventListener('click', event => {
+    event.preventDefault();
+    openDialog(i, link);
+  }));
+  document.querySelectorAll('#ver-todas-btn,#ver-todas-btn-bottom').forEach(button => {
+    button.addEventListener('click', () => openDialog(0, button));
+  });
+  photoDialog.querySelector('[data-close]').addEventListener('click', () => photoDialog.close());
+  photoDialog.querySelector('[data-prev]').addEventListener('click', () => showPhoto(photoIndex - 1));
+  photoDialog.querySelector('[data-next]').addEventListener('click', () => showPhoto(photoIndex + 1));
+  photoDialog.addEventListener('keydown', event => {
+    if (event.key === 'ArrowLeft') { event.preventDefault(); showPhoto(photoIndex - 1); }
+    if (event.key === 'ArrowRight') { event.preventDefault(); showPhoto(photoIndex + 1); }
+  });
+  photoDialog.addEventListener('click', event => {
+    if (event.target === photoDialog) photoDialog.close();
+  });
+  photoDialog.addEventListener('close', () => {
+    document.body.classList.remove('gallery-open');
+    if (origin) origin.focus();
+  });
+}
+
+const filterButtons=[...document.querySelectorAll('[data-filter]')];const catalogCards=[...document.querySelectorAll('[data-city]')];if(filterButtons.length&&catalogCards.length){const empty=document.querySelector('[data-empty]');filterButtons.forEach(button=>button.addEventListener('click',()=>{const value=button.dataset.filter;filterButtons.forEach(item=>{const selected=item===button;item.classList.toggle('active',selected);item.setAttribute('aria-pressed',String(selected))});let visible=0;catalogCards.forEach(card=>{const show=value==='all'||card.dataset.city===value;card.hidden=!show;if(show)visible++});if(empty)empty.hidden=visible!==0;}));}
